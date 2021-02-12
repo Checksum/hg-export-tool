@@ -12,6 +12,7 @@ import stat
 
 here = os.path.dirname(os.path.abspath(__file__))
 FAST_EXPORT_DIR = os.path.join(here, 'fast-export')
+DEFAULT_BRANCH = 'master'
 
 def mkdir_p(path):
     try:
@@ -147,7 +148,7 @@ def convert(hg_repo_copy, git_repo, fast_export_args, bash):
         env=env,
         cwd=git_repo,
     )
-    subprocess.check_call(['git', 'checkout', 'master'], cwd=git_repo)
+    subprocess.check_call(['git', 'checkout', DEFAULT_BRANCH], cwd=git_repo)
 
 def update_notes(git_repo, amended_commits):
     """For commits that we amended on the hg side, update the git note for the
@@ -240,6 +241,9 @@ def main():
         # Quick and dirty, if any args are filepaths, convert to absolute paths:
         if os.path.exists(arg):
             fast_export_args[i] = os.path.abspath(arg)
+        if arg == '-M' or arg == '--default-branch':
+            global DEFAULT_BRANCH
+            DEFAULT_BRANCH = fast_export_args[i + 1]
 
     for hg_repo, git_repo in repo_mapping.items():
         process_repo(
